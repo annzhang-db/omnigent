@@ -33,7 +33,6 @@ def test_unset_or_empty_uses_feature_defaults(environ: dict[str, str]) -> None:
             Feature.PROJECT_REPOSITORY_CREATION,
             Feature.SESSION_ORCHESTRATION,
             Feature.SIBLING_SESSIONS,
-            Feature.SIDEBAR_GROUPING_UI,
             Feature.USER_INBOX,
             Feature.WORKSPACE_CONTENT_SEARCH,
         }
@@ -45,7 +44,6 @@ def test_unset_or_empty_uses_feature_defaults(environ: dict[str, str]) -> None:
         "canvas": False,
         "arca_shutdown_warnings": False,
         "import_review": False,
-        "sidebar_grouping_ui": True,
         "workspace_content_search": True,
         "grid_sessions_display_ui": True,
         "automations_v2": True,
@@ -80,7 +78,6 @@ def test_resolves_comma_separated_enabled_set() -> None:
         "project_repository_creation",
         "session_orchestration",
         "sibling_sessions",
-        "sidebar_grouping_ui",
         "usage_page",
         "user_inbox",
         "workspace_content_search",
@@ -107,7 +104,6 @@ def test_resolves_comma_separated_enabled_set() -> None:
         "project_repository_creation",
         "session_orchestration",
         "sibling_sessions",
-        "sidebar_grouping_ui",
         "user_inbox",
         "workspace_content_search",
     ],
@@ -127,7 +123,6 @@ def test_explicit_disable_wins_and_preserves_other_features(override: str, featu
         "project_repository_creation",
         "session_orchestration",
         "sibling_sessions",
-        "sidebar_grouping_ui",
         "usage_page",
         "user_inbox",
         "workspace_content_search",
@@ -149,13 +144,20 @@ def test_default_off_features_can_also_be_explicitly_disabled(feature: str) -> N
         "project_repository_creation",
         "session_orchestration",
         "sibling_sessions",
-        "sidebar_grouping_ui",
         "user_inbox",
         "workspace_content_search",
     )
 
 
-@pytest.mark.parametrize("override", ["custom_agents_settings_ui", "-custom_agents_settings_ui"])
+@pytest.mark.parametrize(
+    "override",
+    [
+        "custom_agents_settings_ui",
+        "-custom_agents_settings_ui",
+        "sidebar_grouping_ui",
+        "-sidebar_grouping_ui",
+    ],
+)
 def test_retired_feature_is_ignored_with_warning(
     override: str, caplog: pytest.LogCaptureFixture
 ) -> None:
@@ -194,7 +196,6 @@ def test_canvas_is_a_frontend_visible_feature() -> None:
         "project_repository_creation",
         "session_orchestration",
         "sibling_sessions",
-        "sidebar_grouping_ui",
         "user_inbox",
         "workspace_content_search",
     )
