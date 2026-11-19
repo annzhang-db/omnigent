@@ -1,7 +1,8 @@
-// The workspace sidebar's own keyboard shortcuts: the code editor's commands, find,
-// and opening a row in a new tab. They extend the app's registry without joining it,
+// The workspace sidebar's own keyboard shortcuts: its tabs and history, the code editor's
+// commands, find, searches, and opening a row in a new tab. They extend the app's registry without joining it,
 // so the Keyboard Shortcuts page and ⌘K list them only once the sidebar is routed.
 
+import { isMacPlatform } from "@/lib/hotkeys";
 import {
   type Chord,
   chordKeyLabel,
@@ -27,6 +28,79 @@ const mod = (key: Chord): Chord => ({ mod: true, ...key });
 const modAlt = (key: Chord): Chord => ({ mod: true, alt: true, ...key });
 
 const SIDEBAR_BINDINGS = {
+  // A browser keeps ⌘T and ⌘W for its own tabs, so the sidebar's tabs add Option.
+  "workspace.newTab": {
+    label: "New workspace tab",
+    chords: () => [modAlt({ shift: true, code: "KeyN" })],
+  },
+  "workspace.closeTab": {
+    label: "Close workspace tab",
+    chords: () => [modAlt({ code: "KeyW" })],
+  },
+  "workspace.reopenTab": {
+    label: "Reopen closed workspace tab",
+    chords: () => [modAlt({ shift: true, code: "KeyT" })],
+  },
+  // ⌘← / ⌘→ in the macOS app, as in the browsers it follows; text keeps them for line start / end.
+  "workspace.back": {
+    label: "Go back in the workspace",
+    chords: (environment) => [
+      environment.mac && environment.native
+        ? mod({ key: "ArrowLeft" })
+        : modAlt({ shift: true, key: "ArrowLeft" }),
+    ],
+  },
+  "workspace.forward": {
+    label: "Go forward in the workspace",
+    chords: (environment) => [
+      environment.mac && environment.native
+        ? mod({ key: "ArrowRight" })
+        : modAlt({ shift: true, key: "ArrowRight" }),
+    ],
+  },
+  // A browser keeps ⇧⌘[ and ⇧⌘] for its own tabs.
+  "workspace.nextTab": {
+    label: "Next workspace tab",
+    chords: (environment) =>
+      environment.native ? [mod({ shift: true, code: "BracketRight" })] : [],
+  },
+  "workspace.previousTab": {
+    label: "Previous workspace tab",
+    chords: (environment) =>
+      environment.native ? [mod({ shift: true, code: "BracketLeft" })] : [],
+  },
+  "workspace.moveTabLeft": {
+    label: "Move workspace tab left",
+    chords: () => [{ alt: true, shift: true, key: "ArrowLeft" }],
+  },
+  "workspace.moveTabRight": {
+    label: "Move workspace tab right",
+    chords: () => [{ alt: true, shift: true, key: "ArrowRight" }],
+  },
+  "workspace.toggleFullScreen": {
+    label: "Toggle workspace full screen",
+    chords: () => [mod({ shift: true, code: "KeyF" })],
+  },
+  "browser.new": {
+    label: "Open a new browser tab",
+    chords: () => [modAlt({ code: "KeyB" })],
+  },
+  // Physical keys, since Option rewrites letters; ⌃⌘F is the system's full screen on macOS.
+  "palette.text": {
+    label: "Search text in the open session's files",
+    chords: (environment) =>
+      environment.mac ? [{ ctrl: true, mod: true, code: "KeyO" }] : [modAlt({ code: "KeyF" })],
+  },
+  "palette.files": {
+    label: "Go to a file in the open session",
+    chords: (environment) =>
+      environment.mac ? [{ ctrl: true, mod: true, code: "KeyP" }] : [modAlt({ code: "KeyP" })],
+  },
+  // The Explorer chord editors use.
+  "files.toggleTree": {
+    label: "Show or hide the Files tree",
+    chords: () => [mod({ shift: true, code: "KeyE" })],
+  },
   "find.open": {
     label: "Find in file",
     chords: () => [mod({ key: "f" })],
@@ -189,4 +263,36 @@ export function codeMirrorKeys(
   environment?: Partial<ShortcutEnvironment>,
 ): string[] {
   return activeShortcutChords(id, environment).map(codeMirrorKey);
+}
+
+const ARIA_KEY_NAMES: Record<string, string> = {
+  "↵": "Enter",
+  "⌫": "Backspace",
+  Esc: "Escape",
+  "↑": "ArrowUp",
+  "↓": "ArrowDown",
+  "←": "ArrowLeft",
+  "→": "ArrowRight",
+};
+
+/** The chord as an `aria-keyshortcuts` value, such as `Meta+Alt+R`. */
+export function chordAriaShortcut(chord: Chord, mac: boolean = isMacPlatform()): string {
+  const parts: string[] = [];
+  if (mac && chord.mod) parts.push("Meta");
+  if (chord.ctrl || (!mac && chord.mod)) parts.push("Control");
+  if (chord.alt) parts.push("Alt");
+  if (chord.shift) parts.push("Shift");
+  const label = chordKeyLabel(chord);
+  parts.push(ARIA_KEY_NAMES[label] ?? label);
+  return parts.join("+");
+}
+
+/** `aria-keyshortcuts` for the first of `id`'s chords here, or none when it has no chord. */
+export function shortcutAriaKeys(
+  id: ShortcutId,
+  environment?: Partial<ShortcutEnvironment>,
+): string | undefined {
+  const resolved = currentShortcutEnvironment(environment);
+  const chord = activeShortcutChords(id, resolved)[0];
+  return chord ? chordAriaShortcut(chord, resolved.mac) : undefined;
 }
