@@ -290,6 +290,9 @@ const SHOWN: SettingsAvailability = {
   archiveWorktreeCleanup: true,
   mcpServices: true,
   integrationProviders: { github: true, databricks: true },
+  projectKanban: true,
+  sessionTitleInstructions: true,
+  proactiveAgent: true,
 };
 
 describe("chord results in Settings search", () => {
