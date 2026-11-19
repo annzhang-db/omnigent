@@ -4,7 +4,9 @@ export {
   FileTree,
   type FileTreeProps,
   useFileTree,
+  useFileTreeSpriteSheet,
 } from "./FileTree";
+export { type FileTreeResolvedIcon, resolveFileIcon } from "./icons";
 export { FileTreeModel } from "./model";
 export { orderTreePaths } from "./order";
 export type {

@@ -70,7 +70,7 @@ export function FileTree({
 }: FileTreeProps) {
   const subscribe = useCallback((listener: () => void) => model.subscribe(listener), [model]);
   useSyncExternalStore(subscribe, () => model.getVersion());
-  useSharedSpriteSheet();
+  useFileTreeSpriteSheet();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef(new Map<string, HTMLButtonElement>());
@@ -490,8 +490,8 @@ let spriteSheetUsers = 0;
 let spriteSheetElement: Element | null = null;
 
 // Icons reference `<symbol>`s by id, so the sprite sheet is mounted once per
-// document and shared by every tree.
-function useSharedSpriteSheet() {
+// document and shared by every tree and every icon drawn outside one.
+export function useFileTreeSpriteSheet() {
   useLayoutEffect(() => {
     spriteSheetUsers += 1;
     if (!spriteSheetElement) {

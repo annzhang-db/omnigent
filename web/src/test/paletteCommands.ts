@@ -1,7 +1,14 @@
 import { expect } from "vitest";
 
-import type { PaletteCommand } from "@/store/paletteCommands";
+import { type PaletteCommand, usePaletteCommandsStore } from "@/store/paletteCommands";
 import { currentChoiceLabel, type PaletteSetting } from "@/store/paletteSettings";
+
+/** Every command mounted features offer ⌘K, listed or not. */
+export function registeredPaletteCommands(): PaletteCommand[] {
+  return Object.values(usePaletteCommandsStore.getState().groups).flatMap(
+    (group) => group.commands,
+  );
+}
 
 /** The setting `label` among `commands`, failing the test when it isn't offered. */
 export function settingIn(commands: readonly PaletteCommand[], label: string): PaletteSetting {
